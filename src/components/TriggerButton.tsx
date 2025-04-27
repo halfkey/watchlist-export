@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { triggerUpdate } from '@/app/actions';
+import { useRouter } from 'next/navigation';
 
 export default function TriggerButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   return (
     <div className="space-y-4">
@@ -16,6 +18,8 @@ export default function TriggerButton() {
           try {
             const result = await triggerUpdate();
             console.log('Update result:', result);
+            // Refresh the page to show the updated status
+            router.refresh();
           } catch (error) {
             console.error('Failed to trigger update:', error);
             setError(error instanceof Error ? error.message : 'Failed to trigger update');
