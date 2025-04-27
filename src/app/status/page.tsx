@@ -1,26 +1,62 @@
 import { getLastUpdate } from '@/lib/storage';
 import { revalidatePath } from 'next/cache';
 import { Suspense } from 'react';
+import { useState } from 'react';
 
+async function triggerUpdate() {
+  'use server';
+  console.log('Triggering update...');
+  
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron/update`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Update failed:', errorData);
+      throw new Error(errorData.error || 'Failed to trigger update');
+    }
+
+    const data = await response.json();
+    console.log('Update successful:', data);
+    revalidatePath('/status');
+  } catch (error) {
+    console.error('Error triggering update:', error);
+    throw error;
+  }
+}
+
+'use client';
 function TriggerButton() {
+  const [isLoading, setIsLoading] = useState(false);
+
   return (
-    <form action={async () => {
-      'use server';
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron/update`);
-        const data = await response.json();
-        revalidatePath('/status');
-        return data;
-      } catch (error) {
-        console.error('Failed to trigger update:', error);
-        throw error;
-      }
-    }}>
+    <form
+      action={async () => {
+        setIsLoading(true);
+        try {
+          await triggerUpdate();
+        } catch (error) {
+          console.error('Failed to trigger update:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }}
+    >
       <button
         type="submit"
-        className="px-6 py-3 font-medium text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors duration-200"
+        disabled={isLoading}
+        className={`px-6 py-3 font-medium text-white rounded-xl transition-colors duration-200 ${
+          isLoading
+            ? 'bg-slate-800/50 cursor-not-allowed'
+            : 'bg-slate-800 hover:bg-slate-700'
+        }`}
       >
-        Trigger Update Now
+        {isLoading ? 'Updating...' : 'Trigger Update Now'}
       </button>
     </form>
   );
@@ -69,16 +105,7 @@ export default async function StatusPage() {
             )}
 
             <div className="mt-8 flex justify-center">
-              <Suspense fallback={
-                <button
-                  disabled
-                  className="px-6 py-3 font-medium text-white bg-slate-800/50 rounded-xl cursor-not-allowed"
-                >
-                  Updating...
-                </button>
-              }>
-                <TriggerButton />
-              </Suspense>
+              <TriggerButton />
             </div>
           </div>
         </div>
