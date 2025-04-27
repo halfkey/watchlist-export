@@ -19,22 +19,6 @@ interface VolumeFilter {
 // List of valid quote currencies for TradingView
 const VALID_QUOTE_CURRENCIES = ['USD', 'EUR', 'BTC', 'ETH'];
 
-// Function to validate and format a trading pair
-function validateAndFormatPair(pair: string): string | null {
-  // Split the pair into base and quote currencies
-  const [base, quote] = pair.split('/');
-  
-  // Check if the quote currency is valid
-  if (!VALID_QUOTE_CURRENCIES.includes(quote)) {
-    return null;
-  }
-
-  // Convert XBT to BTC for Bitcoin
-  const formattedBase = base.replace('XBT', 'BTC');
-  
-  return `KRAKEN:${formattedBase}${quote}`;
-}
-
 export function formatTradingViewWatchlist(
   data: TickerData,
   filter: VolumeFilter = { minVolumeUSD: 10000, maxPairs: 1000 }

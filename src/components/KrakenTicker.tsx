@@ -16,19 +16,10 @@ interface TickerData {
   };
 }
 
-interface VolumeFilter {
-  minVolumeUSD: number;
-  maxPairs: number;
-}
-
 export default function KrakenTicker() {
   const [tickerData, setTickerData] = useState<TickerData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [volumeFilter, setVolumeFilter] = useState<VolumeFilter>({
-    minVolumeUSD: 10000,
-    maxPairs: 1000
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,7 +45,7 @@ export default function KrakenTicker() {
 
   const handleExport = () => {
     if (tickerData) {
-      const watchlist = formatTradingViewWatchlist(tickerData, volumeFilter);
+      const watchlist = formatTradingViewWatchlist(tickerData);
       const date = new Date().toISOString().split('T')[0];
       downloadWatchlist(watchlist, `kraken-watchlist-${date}.txt`);
     }
