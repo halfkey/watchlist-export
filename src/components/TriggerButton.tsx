@@ -5,31 +5,42 @@ import { triggerUpdate } from '@/app/actions';
 
 export default function TriggerButton() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
-    <form
-      action={async () => {
-        setIsLoading(true);
-        try {
-          await triggerUpdate();
-        } catch (error) {
-          console.error('Failed to trigger update:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }}
-    >
-      <button
-        type="submit"
-        disabled={isLoading}
-        className={`px-6 py-3 font-medium text-white rounded-xl transition-colors duration-200 ${
-          isLoading
-            ? 'bg-slate-800/50 cursor-not-allowed'
-            : 'bg-slate-800 hover:bg-slate-700'
-        }`}
+    <div className="space-y-4">
+      <form
+        action={async () => {
+          setIsLoading(true);
+          setError(null);
+          try {
+            const result = await triggerUpdate();
+            console.log('Update result:', result);
+          } catch (error) {
+            console.error('Failed to trigger update:', error);
+            setError(error instanceof Error ? error.message : 'Failed to trigger update');
+          } finally {
+            setIsLoading(false);
+          }
+        }}
       >
-        {isLoading ? 'Updating...' : 'Trigger Update Now'}
-      </button>
-    </form>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`px-6 py-3 font-medium text-white rounded-xl transition-colors duration-200 ${
+            isLoading
+              ? 'bg-slate-800/50 cursor-not-allowed'
+              : 'bg-slate-800 hover:bg-slate-700'
+          }`}
+        >
+          {isLoading ? 'Updating...' : 'Trigger Update Now'}
+        </button>
+      </form>
+      {error && (
+        <div className="p-4 bg-red-950/50 border border-red-900/50 rounded-lg">
+          <p className="text-red-400">Error: {error}</p>
+        </div>
+      )}
+    </div>
   );
 } 
