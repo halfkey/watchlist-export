@@ -11,7 +11,8 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_APP_URL": "https://watchlist-export.vercel.app"
   },
   "builds": [
     {
@@ -21,8 +22,12 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/"
+      "dest": "/$1"
     }
   ]
 } 
