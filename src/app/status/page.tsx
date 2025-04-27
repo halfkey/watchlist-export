@@ -1,4 +1,30 @@
 import { getLastUpdate } from '@/lib/storage';
+import { revalidatePath } from 'next/cache';
+import { Suspense } from 'react';
+
+function TriggerButton() {
+  return (
+    <form action={async () => {
+      'use server';
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cron/update`);
+        const data = await response.json();
+        revalidatePath('/status');
+        return data;
+      } catch (error) {
+        console.error('Failed to trigger update:', error);
+        throw error;
+      }
+    }}>
+      <button
+        type="submit"
+        className="px-6 py-3 font-medium text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors duration-200"
+      >
+        Trigger Update Now
+      </button>
+    </form>
+  );
+}
 
 export default async function StatusPage() {
   const lastUpdate = await getLastUpdate();
@@ -41,6 +67,19 @@ export default async function StatusPage() {
             ) : (
               <p className="text-slate-400 text-center">No updates recorded yet</p>
             )}
+
+            <div className="mt-8 flex justify-center">
+              <Suspense fallback={
+                <button
+                  disabled
+                  className="px-6 py-3 font-medium text-white bg-slate-800/50 rounded-xl cursor-not-allowed"
+                >
+                  Updating...
+                </button>
+              }>
+                <TriggerButton />
+              </Suspense>
+            </div>
           </div>
         </div>
       </div>
