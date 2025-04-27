@@ -1,7 +1,6 @@
 import { getLastUpdate } from '@/lib/storage';
 import TriggerButton from '@/components/TriggerButton';
 import { Suspense } from 'react';
-import DownloadButton from '@/components/DownloadButton';
 
 async function StatusDisplay() {
   const lastUpdate = await getLastUpdate();
@@ -29,11 +28,6 @@ async function StatusDisplay() {
           {lastUpdate.error && (
             <div className="mt-4 p-4 bg-red-950/50 border border-red-900/50 rounded-lg">
               <p className="text-red-400">Error: {lastUpdate.error}</p>
-            </div>
-          )}
-          {lastUpdate.success && (
-            <div className="mt-8 flex justify-center">
-              <DownloadButton />
             </div>
           )}
         </div>
