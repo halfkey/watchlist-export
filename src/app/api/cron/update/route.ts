@@ -18,31 +18,33 @@ export async function GET() {
     // Format the data for TradingView
     const watchlist = formatTradingViewWatchlist(data.result);
     const pairCount = Object.keys(data.result).length;
+    const timestamp = new Date().toISOString();
     
     console.log('Watchlist generated successfully:', {
       pairCount,
-      timestamp: new Date().toISOString()
+      timestamp
     });
 
-    // Record the successful update
-    recordUpdate({
-      timestamp: new Date().toISOString(),
+    // Record the successful update and wait for it to complete
+    await recordUpdate({
+      timestamp,
       pairCount,
       success: true
     });
 
     return NextResponse.json({
       success: true,
-      timestamp: new Date().toISOString(),
+      timestamp,
       watchlist,
       pairCount
     });
   } catch (error) {
     console.error('Error in cron job:', error);
+    const timestamp = new Date().toISOString();
     
-    // Record the failed update
-    recordUpdate({
-      timestamp: new Date().toISOString(),
+    // Record the failed update and wait for it to complete
+    await recordUpdate({
+      timestamp,
       pairCount: 0,
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
